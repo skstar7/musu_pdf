@@ -1,0 +1,40 @@
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,text/css,application/javascript
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/pdfplatform?serverSelectionTimeoutMS=5000&connectTimeoutMS=3000}
+      auto-index-creation: ${MONGODB_AUTO_INDEX_CREATION:false}
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:50MB}
+      max-request-size: ${MAX_REQUEST_SIZE:150MB}
+
+app:
+  job-store:
+    mode: ${JOB_STORE_MODE:mongo}
+  storage:
+    root: ${STORAGE_ROOT:./data/storage}
+    retention-hours: ${STORAGE_RETENTION_HOURS:24}
+  processing:
+    worker-base-url: ${WORKER_BASE_URL:http://localhost:8090}
+    timeout-seconds: ${WORKER_TIMEOUT_SECONDS:300}
+  security:
+    allowed-extensions: ${ALLOWED_EXTENSIONS:pdf,jpg,jpeg,png,docx,xlsx,pptx,doc,xls,ppt}
+    rate-limit-per-minute: ${RATE_LIMIT_PER_MINUTE:120}
+    max-files-per-job: ${MAX_FILES_PER_JOB:20}
+    max-total-upload-bytes: ${MAX_TOTAL_UPLOAD_BYTES:157286400}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -1,0 +1,424 @@
+openapi: 3.0.3
+info:
+  title: Musu PDF API
+  version: 0.1.0
+  description: |
+    Standalone OpenAPI contract for Musu PDF backend endpoints.
+    This file is intended for frontend/backend/devops handover, client generation, and contract validation.
+servers:
+  - url: http://localhost:8080
+    description: Local development
+
+tags:
+  - name: PDF Operations
+  - name: Jobs
+
+paths:
+  /api/pdf/merge:
+    post:
+      tags: [PDF Operations]
+      summary: Merge PDF files
+      operationId: mergePdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfOperationRequest'
+      responses:
+        '202':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+
+  /api/pdf/split:
+    post:
+      tags: [PDF Operations]
+      summary: Split PDF by ranges
+      operationId: splitPdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/PdfOperationRequest'
+                - type: object
+                  properties:
+                    configuration:
+                      description: JSON string with pageRanges or extractPages
+                      example: '{"pageRanges":"1-3,6,9-10"}'
+      responses:
+        '202':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+
+  /api/pdf/compress:
+    post:
+      tags: [PDF Operations]
+      summary: Compress PDF
+      operationId: compressPdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/PdfOperationRequest'
+                - type: object
+                  properties:
+                    configuration:
+                      description: JSON string with compression level
+                      example: '{"level":"balanced"}'
+      responses:
+        '202':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+
+  /api/pdf/rotate:
+    post:
+      tags: [PDF Operations]
+      summary: Rotate PDF pages
+      operationId: rotatePdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/PdfOperationRequest'
+                - type: object
+                  properties:
+                    configuration:
+                      description: JSON string with rotation angle
+                      example: '{"rotation":"90"}'
+      responses:
+        '202':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+
+  /api/pdf/convert:
+    post:
+      tags: [PDF Operations]
+      summary: Convert via toolSlug
+      operationId: convertPdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConvertRequest'
+      responses:
+        '202':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+
+  /api/pdf/organize:
+    post:
+      tags: [PDF Operations]
+      summary: Organize PDF pages
+      operationId: organizePdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/PdfOperationRequest'
+                - type: object
+                  properties:
+                    configuration:
+                      description: JSON string with pageOrder
+                      example: '{"pageOrder":"3,1,2,4"}'
+      responses:
+        '202':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+
+  /api/pdf/watermark:
+    post:
+      tags: [PDF Operations]
+      summary: Add watermark
+      operationId: watermarkPdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/PdfOperationRequest'
+                - type: object
+                  properties:
+                    configuration:
+                      description: JSON string with watermark text
+                      example: '{"text":"CONFIDENTIAL"}'
+      responses:
+        '202':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+
+  /api/pdf/protect:
+    post:
+      tags: [PDF Operations]
+      summary: Protect PDF with password
+      operationId: protectPdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/PdfOperationRequest'
+                - type: object
+                  properties:
+                    configuration:
+                      description: JSON string with password
+                      example: '{"password":"example-password"}'
+      responses:
+        '202':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+
+  /api/pdf/unlock:
+    post:
+      tags: [PDF Operations]
+      summary: Unlock PDF with password
+      operationId: unlockPdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/PdfOperationRequest'
+                - type: object
+                  properties:
+                    configuration:
+                      description: JSON string with password
+                      example: '{"password":"example-password"}'
+      responses:
+        '202':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+
+  /api/pdf/ocr:
+    post:
+      tags: [PDF Operations]
+      summary: OCR PDF
+      operationId: ocrPdf
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfOperationRequest'
+      responses:
+        '202':
+          description: Job submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+
+  /api/jobs/{jobId}:
+    get:
+      tags: [Jobs]
+      summary: Get job status
+      operationId: getJobStatus
+      parameters:
+        - $ref: '#/components/parameters/jobId'
+      responses:
+        '200':
+          description: Job status fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseJobStatus'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+  /api/jobs/{jobId}/download:
+    get:
+      tags: [Jobs]
+      summary: Download processed artifact
+      operationId: downloadJobFile
+      parameters:
+        - $ref: '#/components/parameters/jobId'
+      responses:
+        '200':
+          description: File stream
+          headers:
+            Content-Disposition:
+              description: Attachment header with filename
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Artifact unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+components:
+  parameters:
+    jobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+      example: 3e041f47-1e96-42a6-b4a6-02cb4f3978cd
+
+  schemas:
+    PdfOperationRequest:
+      type: object
+      required:
+        - files
+      properties:
+        files:
+          type: array
+          items:
+            type: string
+            format: binary
+        configuration:
+          type: string
+          description: JSON string for tool-specific options
+          example: '{"level":"balanced"}'
+
+    ConvertRequest:
+      type: object
+      required:
+        - files
+        - toolSlug
+      properties:
+        files:
+          type: array
+          items:
+            type: string
+            format: binary
+        toolSlug:
+          type: string
+          example: jpg-to-pdf
+        configuration:
+          type: string
+          description: JSON string for tool-specific options
+          example: '{"outputFormat":"pdf"}'
+
+    ApiResponseJobStatus:
+      type: object
+      required:
+        - success
+        - message
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Job submitted
+        data:
+          $ref: '#/components/schemas/JobStatusResponse'
+        errorCode:
+          type: string
+          nullable: true
+          example: null
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseError:
+      type: object
+      required:
+        - success
+        - message
+        - errorCode
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Job not found
+        data:
+          nullable: true
+        errorCode:
+          type: string
+          example: NOT_FOUND
+        timestamp:
+          type: string
+          format: date-time
+
+    JobStatusResponse:
+      type: object
+      required:
+        - jobId
+        - status
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        downloadUrl:
+          type: string
+          nullable: true
+          example: /api/jobs/3e041f47-1e96-42a6-b4a6-02cb4f3978cd/download
+        originalSizeBytes:
+          type: integer
+          format: int64
+          nullable: true
+          example: 150234
+        processedSizeBytes:
+          type: integer
+          format: int64
+          nullable: true
+          example: 83421
+        error:
+          type: string
+          nullable: true
+          example: null
+
+    JobStatus:
+      type: string
+      enum:
+        - QUEUED
+        - PROCESSING
+        - COMPLETED
+        - FAILED

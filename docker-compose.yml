@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  worker:
+    build:
+      context: ./worker
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - storage_data:/data/storage
+    ports:
+      - "8090:8090"
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/pdfplatform
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - STORAGE_ROOT=/data/storage
+      - WORKER_BASE_URL=http://worker:8090
+      - STORAGE_RETENTION_HOURS=24
+      - RATE_LIMIT_PER_MINUTE=120
+    volumes:
+      - storage_data:/data/storage
+    depends_on:
+      - mongodb
+      - redis
+      - worker
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - frontend
+      - backend
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  mongodb_data:
+  storage_data:
